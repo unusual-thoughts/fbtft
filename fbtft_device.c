@@ -397,6 +397,22 @@ static struct fbtft_device_display displays[] = {
 			}
 		}
 	}, {
+		.name = "ew24ha0",
+		.spi = &(struct spi_board_info) {
+			.modalias = "fb_uc1611",
+			.max_speed_hz = 32000000,
+			.mode = SPI_MODE_3,
+			.platform_data = &(struct fbtft_platform_data) {
+				.display = {
+					.buswidth = 8,
+				},
+				.gpios = (const struct fbtft_gpio []) {
+					{ "dc", 24 },
+					{},
+				},
+			}
+		}
+	}, {
 		.name = "flexfb",
 		.spi = &(struct spi_board_info) {
 			.modalias = "flexfb",
@@ -1029,22 +1045,6 @@ static struct fbtft_device_display displays[] = {
 					{ "reset", 15 },
 					{ "dc", 25 },
 					{ "led_", 18 },
-					{},
-				},
-			}
-		}
-	}, {
-		.name = "ew24ha0",
-		.spi = &(struct spi_board_info) {
-			.modalias = "fb_uc1611",
-			.max_speed_hz = 32000000,
-			.mode = SPI_MODE_3,
-			.platform_data = &(struct fbtft_platform_data) {
-				.display = {
-					.buswidth = 8,
-				},
-				.gpios = (const struct fbtft_gpio []) {
-					{ "dc", 24 },
 					{},
 				},
 			}
