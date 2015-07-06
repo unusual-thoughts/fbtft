@@ -283,7 +283,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	// Change order of loops in case of rotate? probably not...
+	// switch order of loops in case of rotate? probably not...
 	y = 0;
 	while (y < yres && i < len) {
 		x = 0;
