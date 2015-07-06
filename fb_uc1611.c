@@ -23,6 +23,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
+#include <linux/gpio.h>
 #include <linux/spi/spi.h>
 #include <linux/delay.h>
 
@@ -96,7 +97,7 @@ static int init_display(struct fbtft_par *par) {
 	write_reg(par, 0xE8 | (ratio & 0x03));
 
 	/* Set bias gain and potentiometer */
-	write_reg(par, 0x81)
+	write_reg(par, 0x81);
 	write_reg(par, (gain & 0x03) << 6 | (pot & 0x3F));
 
 	/* Set temperature compensation */
@@ -278,7 +279,8 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	for (x = 0; x < par->info->var.xres; x++) {
 		for (y = 0; y < par->info->var.yres/8; y+=2) {
-
+			buf = vmem8[y * WIDTH + x] >> 4
+			buf |= vmem8[y * WIDTH + WIDTH + x] & 0xF0
 			buf++;
 			i++;
 		}
@@ -305,7 +307,7 @@ static struct fbtft_display display = {
 		.write_vmem = write_vmem,
 		.init_display = init_display,
 		.set_addr_win = set_addr_win,
-		.set_var = set_var
+		.set_var = set_var,
 		//.blank = blank,
 		.mkdirty = mkdirty,
 	},
