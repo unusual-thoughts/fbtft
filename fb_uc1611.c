@@ -288,7 +288,6 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	while (y < yres && i < len) {
 		x = 0;
 		while (x < xres && i < len) {
-		for (x = 0; x < xres; x++) {
 			*buf = vmem8[y * xres + x] >> 4;
 			*buf |= vmem8[y * xres + xres + x] & 0xF0;
 			buf++;
