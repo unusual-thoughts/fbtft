@@ -1,9 +1,3 @@
-ifneq ($(KERNELRELEASE),)
-# kbuild part of makefile
-
-# Optionally, include config file to allow out of tree kernel modules build
--include $(src)/.config
-
 # Core module
 obj-$(CONFIG_FB_TFT)             += fbtft.o
 fbtft-y                          += fbtft-core.o fbtft-sysfs.o fbtft-bus.o fbtft-io.o
@@ -14,6 +8,8 @@ obj-$(CONFIG_FB_TFT_BD663474)    += fb_bd663474.o
 obj-$(CONFIG_FB_TFT_HX8340BN)    += fb_hx8340bn.o
 obj-$(CONFIG_FB_TFT_HX8347D)     += fb_hx8347d.o
 obj-$(CONFIG_FB_TFT_HX8353D)     += fb_hx8353d.o
+obj-$(CONFIG_FB_TFT_HX8357D)     += fb_hx8357d.o
+obj-$(CONFIG_FB_TFT_ILI9163)     += fb_ili9163.o
 obj-$(CONFIG_FB_TFT_ILI9320)     += fb_ili9320.o
 obj-$(CONFIG_FB_TFT_ILI9325)     += fb_ili9325.o
 obj-$(CONFIG_FB_TFT_ILI9340)     += fb_ili9340.o
@@ -38,23 +34,3 @@ obj-$(CONFIG_FB_FLEX)            += flexfb.o
 
 # Device modules
 obj-$(CONFIG_FB_TFT_FBTFT_DEVICE) += fbtft_device.o
-
-else
-# normal makefile
-KDIR ?= /lib/modules/`uname -r`/build
-
-default: .config
-	$(MAKE) -C $(KDIR) M=$$PWD modules
-
-.config:
-	grep config Kconfig | cut -d' ' -f2 | sed 's@^@CONFIG_@; s@$$@=m@' > .config
-
-install:
-	$(MAKE) -C $(KDIR) M=$$PWD modules_install
-
-
-clean:
-	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions \
-	       modules.order Module.symvers
-
-endif
