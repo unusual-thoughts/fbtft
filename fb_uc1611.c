@@ -262,7 +262,6 @@ static int set_var(struct fbtft_par *par)
 		               | (0x0 & 0x1) << 2 // Mirror Y OFF
 		               | (0x1 & 0x1) << 1 // Mirror X ON
 		               | (0x0 & 0x1) );   // MS nibble last (default)
-	         )
 		break;
 	}
 
@@ -319,6 +318,6 @@ MODULE_ALIAS("platform:" DRVNAME);
 MODULE_ALIAS("spi:uc1611");
 MODULE_ALIAS("platform:uc1611");
 
-MODULE_DESCRIPTION("FB driver for the UltraChip UC1611 LCD controller");
+MODULE_DESCRIPTION("FB driver for the UC1611 LCD controller");
 MODULE_AUTHOR("Henri Chain");
 MODULE_LICENSE("GPL");
