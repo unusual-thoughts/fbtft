@@ -306,6 +306,7 @@ static struct fbtft_display display = {
 	.height = HEIGHT,
 	.bpp = BPP,
 	.fbtftops = {
+		.write = btft_write_spi,
 		.write_vmem = write_vmem,
 		.init_display = init_display,
 		.set_addr_win = set_addr_win,
