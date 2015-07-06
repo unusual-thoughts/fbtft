@@ -34,6 +34,10 @@
 #define HEIGHT		160
 #define BPP		8
 
+// #define RGB565_TO_4BIT(RGB) \
+// 	(19595 * red + 38470 * green +
+//                                 7471 * blue) >> 16
+
 /*
 static unsigned 3wire = 0;
 module_param(3wire, uint, 0);
@@ -176,12 +180,12 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 		"%s(xs=%d, ys=%d, xe=%d, ye=%d)\n", __func__, xs, ys, xe, ye);
 
 	/* Set column address */
-	write_reg(par, ys & 0x0F);
-	write_reg(par, 0x10 | (ys >> 4));
+	write_reg(par, xs & 0x0F);
+	write_reg(par, 0x10 | (xs >> 4));
 
 	/* Set page address */
-	write_reg(par, 0x60 | (xs & 0x0F));
-	write_reg(par, 0x70 | (xs >> 4));
+	write_reg(par, 0x60 | ((ys >> 1) & 0x0F));
+	write_reg(par, 0x70 | (ys >> 5));
 
 	/* Set max column address for wrap-around? */
 }
@@ -214,6 +218,8 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 static int set_var(struct fbtft_par *par)
 {
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
+
+	par->info->var.grayscale = 1;
 
 	switch (par->info->var.rotate) {
 	case 90:
@@ -274,7 +280,7 @@ static int set_var(struct fbtft_par *par)
 }
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
-	u8 *vmem8 = (u8 *)(par->info->screen_base + offset);
+	u8 *vmem8 = (8 *)(par->info->screen_base + offset);
 	u8 *buf = par->txbuf.buf;
 	int x, y, i = 0;
 	int ret = 0;
