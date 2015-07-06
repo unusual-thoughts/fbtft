@@ -56,11 +56,11 @@ MODULE_PARM_DESC(ratio, "BR[1:0] Bias voltage ratio: 0-3 (default: 2)");
 
 static unsigned gain = 3;
 module_param(gain, uint, 0);
-MODULE_PARM_DESC(gain, "PM[7:6] Bias voltage gain: 0-3 (default: 3)");
+MODULE_PARM_DESC(gain, "GN[1:0] Bias voltage gain: 0-3 (default: 3)");
 
-static unsigned pot = 64;
+static unsigned pot = 16;
 module_param(pot, uint, 0);
-MODULE_PARM_DESC(pot, "PM[6:0] Bias voltage pot.: 0-64 (default: 64)");
+MODULE_PARM_DESC(pot, "PM[6:0] Bias voltage pot.: 0-63 (default: 16)");
 
 /* TC -> % compensation per deg C: 0-3 -> -.05, -.10, -.015, -.20 */
 static unsigned temp = 0;
@@ -68,7 +68,7 @@ module_param(temp, uint, 0);
 MODULE_PARM_DESC(temp, "TC[1:0] Temperature compensation: 0-3 (default: 0)");
 
 /* PC[1:0] -> LCD capacitance: 0-3 -> <20nF, 20-28 nF, 29-40 nF, 40-56 nF */
-static unsigned load = 3;
+static unsigned load = 1;
 module_param(load, uint, 0);
 MODULE_PARM_DESC(load, "PC[1:0] Panel Loading: 0-3 (default: 1)");
 
@@ -109,28 +109,30 @@ static int init_display(struct fbtft_par *par) {
 	/* Set pump control */
 	write_reg(par, 0x2C | (pump & 0x03));
 
-	/* Reset page address */
-	write_reg(par, 0x60 | (0x00 & 0x0F));
-	write_reg(par, 0x70 | (0x00 >> 4));
+	// Redundant with set_addr_win()
+	// /* Reset page address */
+	// write_reg(par, 0x60 | (0x00 & 0x0F));
+	// write_reg(par, 0x70 | (0x00 >> 4));
 
-	/* Reset column address */
-	write_reg(par, 0x00 & 0x0F);
-	write_reg(par, 0x10 | (0x00 >> 4));
+	// /* Reset column address */
+	// write_reg(par, 0x00 & 0x0F);
+	// write_reg(par, 0x10 | (0x00 >> 4));
 
 	/* Set 4-bit grayscale mode */
 	write_reg(par, 0xD0 | (0x02 & 0x03));
 
-	/* Set LCD mapping */
-	write_reg(par, 0xC0
-	               | (0x0 & 0x1) << 2 // Mirror Y OFF
-	               | (0x1 & 0x1) << 1 // Mirror X ON
-	               | (0x0 & 0x1) );   // MS nibble last (default)
+	// Redundant with set_var()
+	// /* Set LCD mapping */
+	// write_reg(par, 0xC0
+	//                | (0x0 & 0x1) << 2 // Mirror Y OFF
+	//                | (0x1 & 0x1) << 1 // Mirror X ON
+	//                | (0x0 & 0x1) );   // MS nibble last (default)
 
-	/* Set RAM address control */
-	write_reg(par, 0x88
-	               | (0x0 & 0x1) << 2 // Increment positively
-	               | (0x0 & 0x1) << 1 // Increment column first
-	               | (0x1 & 0x1) );   // Wrap around (default)
+	// /* Set RAM address control */
+	// write_reg(par, 0x88
+	//                | (0x0 & 0x1) << 2 // Increment positively
+	//                | (0x0 & 0x1) << 1 // Increment column first
+	//                | (0x1 & 0x1) );   // Wrap around (default)
 
 	/* Set Display enable */
 	write_reg(par, 0xA8 | 0x07);
@@ -281,8 +283,8 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	for (x = 0; x < xres; x++) {
 		for (y = 0; y < yres; y+=2) {
-			// *buf = vmem8[y * xres + x] >> 4;
-			// *buf |= vmem8[y * xres + xres + x] & 0xF0;
+			*buf = vmem8[y * xres + x] >> 4;
+			*buf |= vmem8[y * xres + xres + x] & 0xF0;
 			buf++;
 			i++;
 		}
