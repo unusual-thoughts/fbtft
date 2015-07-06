@@ -274,20 +274,22 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	u8 *buf = par->txbuf.buf;
 	int x, y, i = 0;
 	int ret = 0;
+	int xres = par->info->var.xres;
+	int yres = par->info->var.yres;
 
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	for (x = 0; x < par->info->var.xres; x++) {
-		for (y = 0; y < par->info->var.yres; y+=2) {
-			// *buf = vmem8[y * WIDTH + x] >> 4;
-			// *buf |= vmem8[y * WIDTH + WIDTH + x] & 0xF0;
+	for (x = 0; x < xres; x++) {
+		for (y = 0; y < yres; y+=2) {
+			// *buf = vmem8[y * xres + x] >> 4;
+			// *buf |= vmem8[y * xres + xres + x] & 0xF0;
 			buf++;
 			i++;
 		}
 	}
 
 	/* Write data */
-	// gpio_set_value(par->gpio.dc, 1);
+	gpio_set_value(par->gpio.dc, 1);
 	// ret = par->fbtftops.write(par, par->txbuf.buf, len / 2);
 
 	if (ret < 0)
