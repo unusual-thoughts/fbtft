@@ -301,12 +301,13 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 
 static struct fbtft_display display = {
+	.txbuflen = -1,
 	.regwidth = 8,
 	.width = WIDTH,
 	.height = HEIGHT,
 	.bpp = BPP,
 	.fbtftops = {
-		.write = btft_write_spi,
+		// .write = fbtft_write_spi,
 		.write_vmem = write_vmem,
 		.init_display = init_display,
 		.set_addr_win = set_addr_win,
