@@ -405,6 +405,7 @@ static struct fbtft_device_display displays[] = {
 			.platform_data = &(struct fbtft_platform_data) {
 				.display = {
 					.buswidth = 8,
+					.txbuflen = -1,
 				},
 				.gpios = (const struct fbtft_gpio []) {
 					{ "dc", 24 },
