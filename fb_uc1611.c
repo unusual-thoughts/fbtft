@@ -54,11 +54,13 @@ static unsigned ratio = 2;
 module_param(ratio, uint, 0);
 MODULE_PARM_DESC(ratio, "BR[1:0] Bias voltage ratio: 0-3 (default: 2)");
 
-static unsigned gain = 3;
+//static unsigned gain = 3;
+static unsigned gain = 0;
 module_param(gain, uint, 0);
 MODULE_PARM_DESC(gain, "GN[1:0] Bias voltage gain: 0-3 (default: 3)");
 
-static unsigned pot = 16;
+//static unsigned pot = 16;
+static unsigned pot = 28;
 module_param(pot, uint, 0);
 MODULE_PARM_DESC(pot, "PM[6:0] Bias voltage pot.: 0-63 (default: 16)");
 
@@ -281,13 +283,19 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	for (x = 0; x < xres; x++) {
-		for (y = 0; y < yres; y+=2) {
+	// Change order of loops in case of rotate? probably not...
+	y = 0;
+	while (y < yres && i < len) {
+		x = 0;
+		while (x < xres && i < len) {
+		for (x = 0; x < xres; x++) {
 			*buf = vmem8[y * xres + x] >> 4;
 			*buf |= vmem8[y * xres + xres + x] & 0xF0;
 			buf++;
-			i++;
+			i += 2;
+			x++;
 		}
+		y += 2;
 	}
 
 	/* Write data */
