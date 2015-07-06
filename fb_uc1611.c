@@ -34,9 +34,10 @@
 #define HEIGHT		160
 #define BPP		8
 
-// #define RGB565_TO_4BIT(RGB) \
-// 	(19595 * red + 38470 * green +
-//                                 7471 * blue) >> 16
+/*#define RGB565_TO_4BIT(RGB) \
+	(19595 * red + 38470 * green +
+                                7471 * blue) >> 16
+*/
 
 /*
 static unsigned 3wire = 0;
@@ -280,7 +281,7 @@ static int set_var(struct fbtft_par *par)
 }
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
-	u8 *vmem8 = (8 *)(par->info->screen_base + offset);
+	u8 *vmem8 = (u8 *)(par->info->screen_base + offset);
 	u8 *buf = par->txbuf.buf;
 	int x, y, i = 0;
 	int ret = 0;
