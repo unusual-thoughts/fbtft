@@ -221,6 +221,14 @@ static int set_var(struct fbtft_par *par)
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
 
 	par->info->var.grayscale = 1;
+	par->info->var->red.offset    = 0;
+	par->info->var->red.length    = 8;
+	par->info->var->green.offset  = 0;
+	par->info->var->green.length  = 8;
+	par->info->var->blue.offset   = 0;
+	par->info->var->blue.length   = 8;
+	par->info->var->transp.offset = 0;
+	par->info->var->transp.length = 0;
 
 	switch (par->info->var.rotate) {
 	case 90:
