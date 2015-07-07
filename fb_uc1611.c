@@ -180,11 +180,11 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 	fbtft_par_dbg(DEBUG_SET_ADDR_WIN, par,
 		"%s(xs=%d, ys=%d, xe=%d, ye=%d)\n", __func__, xs, ys, xe, ye);
 
-	/* Set column address */
+	/* Set column address (not used by driver) */
 	write_reg(par, xs & 0x0F);
 	write_reg(par, 0x10 | (xs >> 4));
 
-	/* Set page address */
+	/* Set page address (divide ys by 2) */
 	write_reg(par, 0x60 | ((ys >> 1) & 0x0F));
 	write_reg(par, 0x70 | (ys >> 5));
 
@@ -281,7 +281,7 @@ static int set_var(struct fbtft_par *par)
 }
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
-	u8 *vmem8 = (u8 *)(par->info->screen_base + offset);
+	u8 *vmem8 = (u8 *)(par->info->screen_base);
 	u8 *buf = par->txbuf.buf;
 	int x, y, i = 0;
 	int ret = 0;
@@ -291,17 +291,18 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
 	// switch order of loops in case of rotate? probably not...
-	y = 0;
-	while (y < yres && i < len) {
-		x = 0;
-		while (x < xres && i < len) {
-			*buf = vmem8[y * xres + x] >> 4;
-			*buf |= vmem8[y * xres + xres + x] & 0xF0;
+	//y = offset / xres;
+	//while (y < yres && i < len) {
+	for (y = ((offset / xres) / 2) * 2; y < (offset + len) / xres; y += 2) {
+		//x = 0;
+		//while (x < xres && i < len) {
+		for (x = 0; x < xres; x++)
+			*buf = vmem8[i] >> 4;
+			*buf |= vmem8[i + xres] & 0xF0;
 			buf++;
-			i += 2;
-			x++;
+			i++;
 		}
-		y += 2;
+		i += 2 * xres;
 	}
 
 	/* Write data */
