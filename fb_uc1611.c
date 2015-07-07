@@ -222,14 +222,14 @@ static int set_var(struct fbtft_par *par)
 
 	par->info->fix.visual = FB_VISUAL_PSEUDOCOLOR;
 	par->info->var.grayscale = 1;
-	par->info->var->red.offset    = 0;
-	par->info->var->red.length    = 8;
-	par->info->var->green.offset  = 0;
-	par->info->var->green.length  = 8;
-	par->info->var->blue.offset   = 0;
-	par->info->var->blue.length   = 8;
-	par->info->var->transp.offset = 0;
-	par->info->var->transp.length = 0;
+	par->info->var.red.offset    = 0;
+	par->info->var.red.length    = 8;
+	par->info->var.green.offset  = 0;
+	par->info->var.green.length  = 8;
+	par->info->var.blue.offset   = 0;
+	par->info->var.blue.length   = 8;
+	par->info->var.transp.offset = 0;
+	par->info->var.transp.length = 0;
 
 	switch (par->info->var.rotate) {
 	case 90:
