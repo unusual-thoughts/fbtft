@@ -304,7 +304,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	int x, y, i;
 	int ret = 0;
 	int line_length = par->info->fix.line_length;
-	u8 y_start, x_start;
+	u8 y_start, y_end;
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
 	// switch order of loops in case of rotate? probably not...
@@ -314,7 +314,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	// Last bit must be 0 because pages are two lines
 	y_start = (offset / line_length) & 0xFE;
 
-	y_end = (offset + len - 1) / line_length
+	y_end = (offset + len - 1) / line_length;
 
 	i = y_start * line_length;
 
