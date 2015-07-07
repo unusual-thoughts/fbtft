@@ -152,37 +152,37 @@ static int init_display(struct fbtft_par *par) {
 	return 0;
 }
 
-static void mkdirty(struct fb_info *info, int y, int height) {
-	struct fbtft_par *par = info->par;
-	struct fb_deferred_io *fbdefio = info->fbdefio;
+// static void mkdirty(struct fb_info *info, int y, int height) {
+// 	struct fbtft_par *par = info->par;
+// 	struct fb_deferred_io *fbdefio = info->fbdefio;
 
-	/* UC1611 can only set page address (a page is two lines) */
-	if (y % 2) {
-		y--;
-		height++;
-	}
+// 	/* UC1611 can only set page address (a page is two lines) */
+// 	if (y % 2) {
+// 		y--;
+// 		height++;
+// 	}
 
-	if (y + height % 2) {
-		height++;
-	}
+// 	if (y + height % 2) {
+// 		height++;
+// 	}
 
-	/* special case, needed ? */
-	if (y == -1) {
-		y = 0;
-		height = info->var.yres - 1;
-	}
+// 	/* special case, needed ? */
+// 	if (y == -1) {
+// 		y = 0;
+// 		height = info->var.yres - 1;
+// 	}
 
-	/* Mark display lines/area as dirty */
-	spin_lock(&par->dirty_lock);
-	if (y < par->dirty_lines_start)
-		par->dirty_lines_start = y;
-	if (y + height - 1 > par->dirty_lines_end)
-		par->dirty_lines_end = y + height - 1;
-	spin_unlock(&par->dirty_lock);
+// 	/* Mark display lines/area as dirty */
+// 	spin_lock(&par->dirty_lock);
+// 	if (y < par->dirty_lines_start)
+// 		par->dirty_lines_start = y;
+// 	if (y + height - 1 > par->dirty_lines_end)
+// 		par->dirty_lines_end = y + height - 1;
+// 	spin_unlock(&par->dirty_lock);
 
-	/* Schedule deferred_io to update display (no-op if already on queue)*/
-	schedule_delayed_work(&info->deferred_work, fbdefio->delay);
-}
+// 	/* Schedule deferred_io to update display (no-op if already on queue)*/
+// 	schedule_delayed_work(&info->deferred_work, fbdefio->delay);
+// }
 
 
 static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) {
@@ -299,19 +299,26 @@ static int set_var(struct fbtft_par *par)
 }
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
-	u8 *vmem8 = (u8 *)(par->info->screen_base + offset);
+	u8 *vmem8 = (u8 *)(par->info->screen_base);
 	u8 *buf = par->txbuf.buf;
-	int x, y, i = 0;
+	int x, y, i;
 	int ret = 0;
 	int line_length = par->info->fix.line_length;
+	u8 y_start, x_start;
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
 	// switch order of loops in case of rotate? probably not...
 	//y = offset / xres;
 	//while (y < yres && i < len) {
-	for (y = ((offset / line_length) / 2) * 2; y < (offset + len) / line_length; y += 2) {
-		//x = 0;
-		//while (x < xres && i < len) {
+
+	// Last bit must be 0 because pages are two lines
+	y_start = (offset / line_length) & 0xFE;
+
+	y_end = (offset + len - 1) / line_length
+
+	i = y_start * line_length;
+
+	for (y = y_start; y <= y_end; y += 2) {
 		for (x = 0; x < line_length; x++) {
 			*buf = vmem8[i] >> 4;
 			*buf |= vmem8[i + line_length] & 0xF0;
@@ -347,7 +354,7 @@ static struct fbtft_display display = {
 		.set_addr_win = set_addr_win,
 		.set_var = set_var,
 		//.blank = blank,
-		.mkdirty = mkdirty,
+		//.mkdirty = mkdirty,
 	},
 };
 
