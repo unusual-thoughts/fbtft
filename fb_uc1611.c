@@ -163,7 +163,7 @@ static void mkdirty(struct fb_info *info, int y, int height) {
 	}
 
 	if (y + height % 2) {
-		height++
+		height++;
 	}
 
 	/* special case, needed ? */
