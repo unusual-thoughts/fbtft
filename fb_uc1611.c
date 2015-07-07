@@ -116,6 +116,9 @@ static int init_display(struct fbtft_par *par) {
 	/* Set pump control */
 	write_reg(par, 0x2C | (pump & 0x03));
 
+	/* Set inverse display */
+	write_reg(par, 0xA6 | (0x01 & 0x01));
+
 	// Redundant with set_addr_win()
 	// /* Reset page address */
 	// write_reg(par, 0x60 | (0x00 & 0x0F));
