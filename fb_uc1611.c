@@ -33,6 +33,8 @@
 #define WIDTH		240
 #define HEIGHT		160
 #define BPP		8
+#define FPS		40
+
 
 /*#define RGB565_TO_4BIT(RGB) \
 	(19595 * red + 38470 * green +
@@ -335,6 +337,7 @@ static struct fbtft_display display = {
 	.width = WIDTH,
 	.height = HEIGHT,
 	.bpp = BPP,
+	.fps = FPS,
 	.fbtftops = {
 		// .write = fbtft_write_spi,
 		.write_vmem = write_vmem,
