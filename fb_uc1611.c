@@ -295,19 +295,17 @@ static int set_var(struct fbtft_par *par)
 }
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
-	u8 *vmem8 = (u8 *)(par->info->screen_base);
+	u8 *vmem8 = (u8 *)(par->info->screen_base + offset);
 	u8 *buf = par->txbuf.buf;
 	int x, y, i = 0;
 	int ret = 0;
-	int xres = par->info->var.xres;
-	int yres = par->info->var.yres;
-
+	int line_length = par->info->fix.line_length;
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
 	// switch order of loops in case of rotate? probably not...
 	//y = offset / xres;
 	//while (y < yres && i < len) {
-	for (y = ((offset / xres) / 2) * 2; y < (offset + len) / xres; y += 2) {
+	for (y = ((offset / line_length) / 2) * 2; y < (offset + len) / line_length; y += 2) {
 		//x = 0;
 		//while (x < xres && i < len) {
 		for (x = 0; x < xres; x++) {
