@@ -308,13 +308,13 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	for (y = ((offset / line_length) / 2) * 2; y < (offset + len) / line_length; y += 2) {
 		//x = 0;
 		//while (x < xres && i < len) {
-		for (x = 0; x < xres; x++) {
+		for (x = 0; x < line_length; x++) {
 			*buf = vmem8[i] >> 4;
-			*buf |= vmem8[i + xres] & 0xF0;
+			*buf |= vmem8[i + line_length] & 0xF0;
 			buf++;
 			i++;
 		}
-		i += xres;
+		i += line_length;
 	}
 
 	/* Write data */
