@@ -302,7 +302,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 			buf++;
 			i++;
 		}
-		i += 2 * xres;
+		i += xres;
 	}
 
 	/* Write data */
