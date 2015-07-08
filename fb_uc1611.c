@@ -307,10 +307,6 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	u8 y_start, y_end;
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	// switch order of loops in case of rotate? probably not...
-	//y = offset / xres;
-	//while (y < yres && i < len) {
-
 	// Last bit must be 0 because pages are two lines
 	y_start = (offset / line_length) & 0xFE;
 
@@ -318,15 +314,28 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	i = y_start * line_length;
 
-	for (y = y_start; y <= y_end; y += 2) {
-		for (x = 0; x < line_length; x++) {
-			*buf = vmem8[i] >> 4;
-			*buf |= vmem8[i + line_length] & 0xF0;
-			buf++;
-			i++;
+	switch (par->info->var.rotate)
+	case 90:
+	case 270:
+		for (y = y_start; y <= y_end; y++) {
+			for (x = 0; x < line_length; x +=2) {
+				*buf = vmem8[i] >> 4;
+				*buf |= vmem8[i + 1] & 0xF0;
+				buf++;
+				i += 2;
+			}
 		}
-		i += line_length;
-	}
+	default:
+		for (y = y_start; y <= y_end; y += 2) {
+			for (x = 0; x < line_length; x++) {
+				*buf = vmem8[i] >> 4;
+				*buf |= vmem8[i + line_length] & 0xF0;
+				buf++;
+				i++;
+			}
+			i += line_length;
+		}
+		break;
 
 	/* Write data */
 	gpio_set_value(par->gpio.dc, 1);
