@@ -278,7 +278,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	int line_length = par->info->fix.line_length;
 	int y_start = (offset / line_length);
 	int y_end = (offset + len - 1) / line_length;
-	u8 x, y, i;
+	int x, y, i;
 	int ret = 0;
 
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
