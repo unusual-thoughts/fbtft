@@ -273,11 +273,11 @@ static int set_var(struct fbtft_par *par)
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	u8 *vmem8 = (u8 *)(par->info->screen_base);
-	u8 *buf8 = par->txbuf.buf;
-	u16 *buf16 = par->txbuf.buf;
+	u8 *buf8 = (u8 *)(par->txbuf.buf);
+	u16 *buf16 = (u16 *)(par->txbuf.buf);
 	int line_length = par->info->fix.line_length;
-	u8 y_start = (offset / line_length);
-	u8 y_end = (offset + len - 1) / line_length;
+	int y_start = (offset / line_length);
+	int y_end = (offset + len - 1) / line_length;
 	u8 x, y, i;
 	int ret = 0;
 
@@ -336,7 +336,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 			i = y_start * line_length;
 			for (y = y_start; y <= y_end; y += 2) {
 				for (x = 0; x < line_length; x++) {
-					*buf16 = 0x00;
+					*buf16 = 0x100;
 					*buf16 |= vmem8[i] >> 4;
 					*buf16 |= vmem8[i + line_length] & 0xF0;
 					buf16++;
