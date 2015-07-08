@@ -35,12 +35,6 @@
 #define BPP		8
 #define FPS		40
 
-
-/*#define RGB565_TO_4BIT(RGB) \
-	(19595 * red + 38470 * green +
-                                7471 * blue) >> 16
-*/
-
 /*
 static unsigned 3wire = 0;
 module_param(3wire, uint, 0);
@@ -152,39 +146,6 @@ static int init_display(struct fbtft_par *par) {
 	return 0;
 }
 
-// static void mkdirty(struct fb_info *info, int y, int height) {
-// 	struct fbtft_par *par = info->par;
-// 	struct fb_deferred_io *fbdefio = info->fbdefio;
-
-// 	/* UC1611 can only set page address (a page is two lines) */
-// 	if (y % 2) {
-// 		y--;
-// 		height++;
-// 	}
-
-// 	if (y + height % 2) {
-// 		height++;
-// 	}
-
-// 	/* special case, needed ? */
-// 	if (y == -1) {
-// 		y = 0;
-// 		height = info->var.yres - 1;
-// 	}
-
-// 	/* Mark display lines/area as dirty */
-// 	spin_lock(&par->dirty_lock);
-// 	if (y < par->dirty_lines_start)
-// 		par->dirty_lines_start = y;
-// 	if (y + height - 1 > par->dirty_lines_end)
-// 		par->dirty_lines_end = y + height - 1;
-// 	spin_unlock(&par->dirty_lock);
-
-// 	/* Schedule deferred_io to update display (no-op if already on queue)*/
-// 	schedule_delayed_work(&info->deferred_work, fbdefio->delay);
-// }
-
-
 static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) {
 	fbtft_par_dbg(DEBUG_SET_ADDR_WIN, par,
 		"%s(xs=%d, ys=%d, xe=%d, ye=%d)\n", __func__, xs, ys, xe, ye);
@@ -192,11 +153,11 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 	switch (par->info->var.rotate) {
 	case 90:
 	case 270:
-		/* Set column address (not used by driver) */
+		/* Set column address */
 		write_reg(par, ys & 0x0F);
 		write_reg(par, 0x10 | (ys >> 4));
 
-		/* Set page address (divide xs by 2) */
+		/* Set page address (divide xs by 2) (not used by driver) */
 		write_reg(par, 0x60 | ((xs >> 1) & 0x0F));
 		write_reg(par, 0x70 | (xs >> 5));
 		break;
@@ -212,16 +173,16 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 	}
 }
 
-/*static int blank(struct fbtft_par *par, bool on) {
+static int blank(struct fbtft_par *par, bool on) {
 	fbtft_par_dbg(DEBUG_BLANK, par, "%s(blank=%s)\n",
 		__func__, on ? "true" : "false");
 
 	if (on)
-		write_reg(par, 0xAE);
+		write_reg(par, 0xA8 | 0x07);
 	else
-		write_reg(par, 0xAF);
+		write_reg(par, 0xA8 | 0x00);
 	return 0;
-}*/
+}
 
 /* Gamma is used to control Contrast */
 // static int set_gamma(struct fbtft_par *par, unsigned long *curves) {
@@ -312,46 +273,86 @@ static int set_var(struct fbtft_par *par)
 
 static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	u8 *vmem8 = (u8 *)(par->info->screen_base);
-	u8 *buf = par->txbuf.buf;
-	int x, y, i;
-	int ret = 0;
+	u8 *buf8 = par->txbuf.buf;
+	u16 *buf16 = par->txbuf.buf;
 	int line_length = par->info->fix.line_length;
-	u8 y_start, y_end;
+	u8 y_start = (offset / line_length);
+	u8 y_end = (offset + len - 1) / line_length;
+	u8 x, y, i;
+	int ret = 0;
+
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	// Last bit must be 0 because pages are two lines
-	y_start = (offset / line_length) & 0xFE;
-
-	y_end = (offset + len - 1) / line_length;
-
-	i = y_start * line_length;
-
-	switch (par->info->var.rotate) {
-	case 90:
-	case 270:
-		for (y = y_start; y <= y_end; y++) {
-			for (x = 0; x < line_length; x +=2) {
-				*buf = vmem8[i] >> 4;
-				*buf |= vmem8[i + 1] & 0xF0;
-				buf++;
-				i += 2;
+	switch (display -> buswidth) {
+	case 8:
+		switch (par->info->var.rotate) {
+		case 90:
+		case 270:
+			i = y_start * line_length;
+			for (y = y_start; y <= y_end; y++) {
+				for (x = 0; x < line_length; x +=2) {
+					*buf8 = vmem8[i] >> 4;
+					*buf8 |= vmem8[i + 1] & 0xF0;
+					buf8++;
+					i += 2;
+				}
 			}
+			break;
+		default:
+			// Must be even because pages are two lines
+			y_start &= 0xFE;
+			i = y_start * line_length;
+			for (y = y_start; y <= y_end; y += 2) {
+				for (x = 0; x < line_length; x++) {
+					*buf8 = vmem8[i] >> 4;
+					*buf8 |= vmem8[i + line_length] & 0xF0;
+					buf8++;
+					i++;
+				}
+				i += line_length;
+			}
+			break;
+		}
+		gpio_set_value(par->gpio.dc, 1);
+		break;
+	case 9:
+		switch (par->info->var.rotate) {
+		case 90:
+		case 270:
+			i = y_start * line_length;
+			for (y = y_start; y <= y_end; y++) {
+				for (x = 0; x < line_length; x +=2) {
+					*buf16 = 0x100;
+					*buf16 |= vmem8[i] >> 4;
+					*buf16 |= vmem8[i + 1] & 0xF0;
+					buf++;
+					i += 2;
+				}
+			}
+			break;
+		default:
+			// Must be even because pages are two lines
+			y_start &= 0xFE;
+			i = y_start * line_length;
+			for (y = y_start; y <= y_end; y += 2) {
+				for (x = 0; x < line_length; x++) {
+					*buf16 = 0x00;
+					*buf16 |= vmem8[i] >> 4;
+					*buf16 |= vmem8[i + line_length] & 0xF0;
+					buf++;
+					i++;
+				}
+				i += line_length;
+			}
+			break;
 		}
 		break;
 	default:
-		for (y = y_start; y <= y_end; y += 2) {
-			for (x = 0; x < line_length; x++) {
-				*buf = vmem8[i] >> 4;
-				*buf |= vmem8[i + line_length] & 0xF0;
-				buf++;
-				i++;
-			}
-			i += line_length;
-		}
-		break;
+		dev_err(par->info->device, "unsupported buswidth %d\n",
+			display->buswidth);
 	}
+
 	/* Write data */
-	gpio_set_value(par->gpio.dc, 1);
 	ret = par->fbtftops.write(par, par->txbuf.buf, len / 2);
 
 	if (ret < 0)
@@ -361,7 +362,6 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 	return ret;
 }
 
-
 static struct fbtft_display display = {
 	.txbuflen = -1,
 	.regwidth = 8,
@@ -370,13 +370,11 @@ static struct fbtft_display display = {
 	.bpp = BPP,
 	.fps = FPS,
 	.fbtftops = {
-		// .write = fbtft_write_spi,
-		.write_vmem = write_vmem,
+		.write_vmem = write_vmem8_bus8,
 		.init_display = init_display,
 		.set_addr_win = set_addr_win,
 		.set_var = set_var,
-		//.blank = blank,
-		//.mkdirty = mkdirty,
+		.blank = blank,
 	},
 };
 
