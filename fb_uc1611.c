@@ -178,9 +178,9 @@ static int blank(struct fbtft_par *par, bool on) {
 		__func__, on ? "true" : "false");
 
 	if (on)
-		write_reg(par, 0xA8 | 0x07);
-	else
 		write_reg(par, 0xA8 | 0x00);
+	else
+		write_reg(par, 0xA8 | 0x07);
 	return 0;
 }
 
