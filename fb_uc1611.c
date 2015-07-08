@@ -314,7 +314,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	i = y_start * line_length;
 
-	switch (par->info->var.rotate)
+	switch (par->info->var.rotate) {
 	case 90:
 	case 270:
 		for (y = y_start; y <= y_end; y++) {
@@ -325,6 +325,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 				i += 2;
 			}
 		}
+		break;
 	default:
 		for (y = y_start; y <= y_end; y += 2) {
 			for (x = 0; x < line_length; x++) {
@@ -336,7 +337,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 			i += line_length;
 		}
 		break;
-
+	}
 	/* Write data */
 	gpio_set_value(par->gpio.dc, 1);
 	ret = par->fbtftops.write(par, par->txbuf.buf, len / 2);
