@@ -283,7 +283,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 
 	fbtft_par_dbg(DEBUG_WRITE_VMEM, par, "%s()\n", __func__);
 
-	switch (display -> buswidth) {
+	switch (par->pdata->display.buswidth) {
 	case 8:
 		switch (par->info->var.rotate) {
 		case 90:
@@ -349,7 +349,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 		break;
 	default:
 		dev_err(par->info->device, "unsupported buswidth %d\n",
-			display->buswidth);
+			par->pdata->display.buswidth);
 	}
 
 	/* Write data */
