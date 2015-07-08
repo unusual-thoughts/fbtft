@@ -198,7 +198,7 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 
 		/* Set page address (divide xs by 2) */
 		write_reg(par, 0x60 | ((xs >> 1) & 0x0F));
-		write_reg(par, 0x70 | (ss >> 5));
+		write_reg(par, 0x70 | (xs >> 5));
 		break;
 	default:
 		/* Set column address (not used by driver) */
