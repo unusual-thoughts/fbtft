@@ -277,7 +277,7 @@ static int set_var(struct fbtft_par *par)
 		write_reg(par, 0xC0
 		               | (0x1 & 0x1) << 2 // Mirror Y ON
 		               | (0x0 & 0x1) << 1 // Mirror X OFF
-		               | (0x1 & 0x1) );   // MS nibble first
+		               | (0x0 & 0x1) );   // MS nibble last (default)
 		break;
 	case 270:
 		/* Set RAM address control */
@@ -290,7 +290,7 @@ static int set_var(struct fbtft_par *par)
 		write_reg(par, 0xC0
 		               | (0x1 & 0x1) << 2 // Mirror Y ON
 		               | (0x1 & 0x1) << 1 // Mirror X ON
-		               | (0x1 & 0x1) );   // MS nibble first
+		               | (0x0 & 0x1) );   // MS nibble last (default)
 		break;
 	default:
 		/* Set RAM address control */
