@@ -189,15 +189,27 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 	fbtft_par_dbg(DEBUG_SET_ADDR_WIN, par,
 		"%s(xs=%d, ys=%d, xe=%d, ye=%d)\n", __func__, xs, ys, xe, ye);
 
-	/* Set column address (not used by driver) */
-	write_reg(par, xs & 0x0F);
-	write_reg(par, 0x10 | (xs >> 4));
+	switch (par->info->var.rotate) {
+	case 90:
+	case 270:
+		/* Set column address (not used by driver) */
+		write_reg(par, ys & 0x0F);
+		write_reg(par, 0x10 | (ys >> 4));
 
-	/* Set page address (divide ys by 2) */
-	write_reg(par, 0x60 | ((ys >> 1) & 0x0F));
-	write_reg(par, 0x70 | (ys >> 5));
+		/* Set page address (divide xs by 2) */
+		write_reg(par, 0x60 | ((xs >> 1) & 0x0F));
+		write_reg(par, 0x70 | (ss >> 5));
+		break;
+	default:
+		/* Set column address (not used by driver) */
+		write_reg(par, xs & 0x0F);
+		write_reg(par, 0x10 | (xs >> 4));
 
-	/* Set max column address for wrap-around? */
+		/* Set page address (divide ys by 2) */
+		write_reg(par, 0x60 | ((ys >> 1) & 0x0F));
+		write_reg(par, 0x70 | (ys >> 5));
+		break;
+	}
 }
 
 /*static int blank(struct fbtft_par *par, bool on) {
@@ -265,7 +277,7 @@ static int set_var(struct fbtft_par *par)
 		write_reg(par, 0xC0
 		               | (0x1 & 0x1) << 2 // Mirror Y ON
 		               | (0x0 & 0x1) << 1 // Mirror X OFF
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+		               | (0x1 & 0x1) );   // MS nibble first
 		break;
 	case 270:
 		/* Set RAM address control */
@@ -278,7 +290,7 @@ static int set_var(struct fbtft_par *par)
 		write_reg(par, 0xC0
 		               | (0x1 & 0x1) << 2 // Mirror Y ON
 		               | (0x1 & 0x1) << 1 // Mirror X ON
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+		               | (0x1 & 0x1) );   // MS nibble first
 		break;
 	default:
 		/* Set RAM address control */
