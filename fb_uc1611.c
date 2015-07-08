@@ -325,7 +325,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 					*buf16 = 0x100;
 					*buf16 |= vmem8[i] >> 4;
 					*buf16 |= vmem8[i + 1] & 0xF0;
-					buf++;
+					buf16++;
 					i += 2;
 				}
 			}
@@ -339,7 +339,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 					*buf16 = 0x00;
 					*buf16 |= vmem8[i] >> 4;
 					*buf16 |= vmem8[i + line_length] & 0xF0;
-					buf++;
+					buf16++;
 					i++;
 				}
 				i += line_length;
@@ -370,7 +370,7 @@ static struct fbtft_display display = {
 	.bpp = BPP,
 	.fps = FPS,
 	.fbtftops = {
-		.write_vmem = write_vmem8_bus8,
+		.write_vmem = write_vmem,
 		.init_display = init_display,
 		.set_addr_win = set_addr_win,
 		.set_var = set_var,
