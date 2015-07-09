@@ -55,18 +55,18 @@ static unsigned ratio = 2;
 module_param(ratio, uint, 0);
 MODULE_PARM_DESC(ratio, "BR[1:0] Bias voltage ratio: 0-3 (default: 2)");
 
-//static unsigned gain = 3;
-static unsigned gain = 0;
+/*static unsigned gain = 3;*/
+static unsigned gain;
 module_param(gain, uint, 0);
 MODULE_PARM_DESC(gain, "GN[1:0] Bias voltage gain: 0-3 (default: 3)");
 
-//static unsigned pot = 16;
+/*static unsigned pot = 16;*/
 static unsigned pot = 28;
 module_param(pot, uint, 0);
 MODULE_PARM_DESC(pot, "PM[6:0] Bias voltage pot.: 0-63 (default: 16)");
 
 /* TC -> % compensation per deg C: 0-3 -> -.05, -.10, -.015, -.20 */
-static unsigned temp = 0;
+static unsigned temp;
 module_param(temp, uint, 0);
 MODULE_PARM_DESC(temp, "TC[1:0] Temperature compensation: 0-3 (default: 0)");
 
@@ -80,7 +80,8 @@ static unsigned pump = 3;
 module_param(pump, uint, 0);
 MODULE_PARM_DESC(pump, "PC[3:2] Pump control: 0,1,3 (default: 3)");
 
-static int init_display(struct fbtft_par *par) {
+static int init_display(struct fbtft_par *par)
+{
 	int ret;
 
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
@@ -115,30 +116,8 @@ static int init_display(struct fbtft_par *par) {
 	/* Set inverse display */
 	write_reg(par, 0xA6 | (0x01 & 0x01));
 
-	// Redundant with set_addr_win()
-	// /* Reset page address */
-	// write_reg(par, 0x60 | (0x00 & 0x0F));
-	// write_reg(par, 0x70 | (0x00 >> 4));
-
-	// /* Reset column address */
-	// write_reg(par, 0x00 & 0x0F);
-	// write_reg(par, 0x10 | (0x00 >> 4));
-
 	/* Set 4-bit grayscale mode */
 	write_reg(par, 0xD0 | (0x02 & 0x03));
-
-	// Redundant with set_var()
-	// /* Set LCD mapping */
-	// write_reg(par, 0xC0
-	//                | (0x0 & 0x1) << 2 // Mirror Y OFF
-	//                | (0x1 & 0x1) << 1 // Mirror X ON
-	//                | (0x0 & 0x1) );   // MS nibble last (default)
-
-	// /* Set RAM address control */
-	// write_reg(par, 0x88
-	//                | (0x0 & 0x1) << 2 // Increment positively
-	//                | (0x0 & 0x1) << 1 // Increment column first
-	//                | (0x1 & 0x1) );   // Wrap around (default)
 
 	/* Set Display enable */
 	write_reg(par, 0xA8 | 0x07);
@@ -146,7 +125,8 @@ static int init_display(struct fbtft_par *par) {
 	return 0;
 }
 
-static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) {
+static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
+{
 	fbtft_par_dbg(DEBUG_SET_ADDR_WIN, par,
 		"%s(xs=%d, ys=%d, xe=%d, ye=%d)\n", __func__, xs, ys, xe, ye);
 
@@ -173,7 +153,8 @@ static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye) 
 	}
 }
 
-static int blank(struct fbtft_par *par, bool on) {
+static int blank(struct fbtft_par *par, bool on)
+{
 	fbtft_par_dbg(DEBUG_BLANK, par, "%s(blank=%s)\n",
 		__func__, on ? "true" : "false");
 
@@ -184,25 +165,11 @@ static int blank(struct fbtft_par *par, bool on) {
 	return 0;
 }
 
-/* Gamma is used to control Contrast */
-// static int set_gamma(struct fbtft_par *par, unsigned long *curves) {
-// 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
-
-// 	/* apply mask */
-// 	curves[0] &= 0xFF;
-
-// 	/* Set Contrast Control for BANK0 */
-// 	write_reg(par, 0x81);
-// 	write_reg(par, curves[0]);
-
-// 	return 0;
-// }
-
 static int set_var(struct fbtft_par *par)
 {
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
 
-	//par->info->fix.visual = FB_VISUAL_PSEUDOCOLOR;
+	/* par->info->fix.visual = FB_VISUAL_PSEUDOCOLOR; */
 	par->info->var.grayscale = 1;
 	par->info->var.red.offset    = 0;
 	par->info->var.red.length    = 8;
@@ -217,61 +184,62 @@ static int set_var(struct fbtft_par *par)
 	case 90:
 		/* Set RAM address control */
 		write_reg(par, 0x88
-		               | (0x0 & 0x1) << 2 // Increment positively
-		               | (0x1 & 0x1) << 1 // Increment page first
-		               | (0x1 & 0x1) );   // Wrap around (default)
+			| (0x0 & 0x1) << 2 /* Increment positively */
+			| (0x1 & 0x1) << 1 /* Increment page first */
+			| (0x1 & 0x1));    /* Wrap around (default) */
 
 		/* Set LCD mapping */
 		write_reg(par, 0xC0
-		               | (0x0 & 0x1) << 2 // Mirror Y OFF
-		               | (0x0 & 0x1) << 1 // Mirror X OFF
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+			| (0x0 & 0x1) << 2 /* Mirror Y OFF */
+			| (0x0 & 0x1) << 1 /* Mirror X OFF */
+			| (0x0 & 0x1));    /* MS nibble last (default) */
 		break;
 	case 180:
 		/* Set RAM address control */
 		write_reg(par, 0x88
-		               | (0x0 & 0x1) << 2 // Increment positively
-		               | (0x0 & 0x1) << 1 // Increment column first
-		               | (0x1 & 0x1) );   // Wrap around (default)
+			| (0x0 & 0x1) << 2 /* Increment positively */
+			| (0x0 & 0x1) << 1 /* Increment column first */
+			| (0x1 & 0x1));    /* Wrap around (default) */
 
 		/* Set LCD mapping */
 		write_reg(par, 0xC0
-		               | (0x1 & 0x1) << 2 // Mirror Y ON
-		               | (0x0 & 0x1) << 1 // Mirror X OFF
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+			| (0x1 & 0x1) << 2 /* Mirror Y ON */
+			| (0x0 & 0x1) << 1 /* Mirror X OFF */
+			| (0x0 & 0x1));    /* MS nibble last (default) */
 		break;
 	case 270:
 		/* Set RAM address control */
 		write_reg(par, 0x88
-		               | (0x0 & 0x1) << 2 // Increment positively
-		               | (0x1 & 0x1) << 1 // Increment page first
-		               | (0x1 & 0x1) );   // Wrap around (default)
+			| (0x0 & 0x1) << 2 /* Increment positively */
+			| (0x1 & 0x1) << 1 /* Increment page first */
+			| (0x1 & 0x1));    /* Wrap around (default) */
 
 		/* Set LCD mapping */
 		write_reg(par, 0xC0
-		               | (0x1 & 0x1) << 2 // Mirror Y ON
-		               | (0x1 & 0x1) << 1 // Mirror X ON
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+			| (0x1 & 0x1) << 2 /* Mirror Y ON */
+			| (0x1 & 0x1) << 1 /* Mirror X ON */
+			| (0x0 & 0x1));    /* MS nibble last (default) */
 		break;
 	default:
 		/* Set RAM address control */
 		write_reg(par, 0x88
-		               | (0x0 & 0x1) << 2 // Increment positively
-		               | (0x0 & 0x1) << 1 // Increment column first
-		               | (0x1 & 0x1) );   // Wrap around (default)
+			| (0x0 & 0x1) << 2 /* Increment positively */
+			| (0x0 & 0x1) << 1 /* Increment column first */
+			| (0x1 & 0x1));    /* Wrap around (default) */
 
 		/* Set LCD mapping */
 		write_reg(par, 0xC0
-		               | (0x0 & 0x1) << 2 // Mirror Y OFF
-		               | (0x1 & 0x1) << 1 // Mirror X ON
-		               | (0x0 & 0x1) );   // MS nibble last (default)
+			| (0x0 & 0x1) << 2 /* Mirror Y OFF */
+			| (0x1 & 0x1) << 1 /* Mirror X ON */
+			| (0x0 & 0x1));    /* MS nibble last (default) */
 		break;
 	}
 
 	return 0;
 }
 
-static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
+static int write_vmem(struct fbtft_par *par, size_t offset, size_t len)
+{
 	u8 *vmem8 = (u8 *)(par->info->screen_base);
 	u8 *buf8 = (u8 *)(par->txbuf.buf);
 	u16 *buf16 = (u16 *)(par->txbuf.buf);
@@ -290,7 +258,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 		case 270:
 			i = y_start * line_length;
 			for (y = y_start; y <= y_end; y++) {
-				for (x = 0; x < line_length; x +=2) {
+				for (x = 0; x < line_length; x += 2) {
 					*buf8 = vmem8[i] >> 4;
 					*buf8 |= vmem8[i + 1] & 0xF0;
 					buf8++;
@@ -299,7 +267,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 			}
 			break;
 		default:
-			// Must be even because pages are two lines
+			/* Must be even because pages are two lines */
 			y_start &= 0xFE;
 			i = y_start * line_length;
 			for (y = y_start; y <= y_end; y += 2) {
@@ -321,7 +289,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 		case 270:
 			i = y_start * line_length;
 			for (y = y_start; y <= y_end; y++) {
-				for (x = 0; x < line_length; x +=2) {
+				for (x = 0; x < line_length; x += 2) {
 					*buf16 = 0x100;
 					*buf16 |= vmem8[i] >> 4;
 					*buf16 |= vmem8[i + 1] & 0xF0;
@@ -331,7 +299,7 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len) {
 			}
 			break;
 		default:
-			// Must be even because pages are two lines
+			/* Must be even because pages are two lines */
 			y_start &= 0xFE;
 			i = y_start * line_length;
 			for (y = y_start; y <= y_end; y += 2) {
