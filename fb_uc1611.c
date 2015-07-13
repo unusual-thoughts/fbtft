@@ -280,6 +280,9 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len)
 			break;
 		}
 		gpio_set_value(par->gpio.dc, 1);
+
+		/* Write data */
+		ret = par->fbtftops.write(par, par->txbuf.buf, len / 2);
 		break;
 	case 9:
 		switch (par->info->var.rotate) {
@@ -312,14 +315,14 @@ static int write_vmem(struct fbtft_par *par, size_t offset, size_t len)
 			}
 			break;
 		}
+
+		/* Write data */
+		ret = par->fbtftops.write(par, par->txbuf.buf, len);
 		break;
 	default:
 		dev_err(par->info->device, "unsupported buswidth %d\n",
 			par->pdata->display.buswidth);
 	}
-
-	/* Write data */
-	ret = par->fbtftops.write(par, par->txbuf.buf, len / 2);
 
 	if (ret < 0)
 		dev_err(par->info->device, "write failed and returned: %d\n",
