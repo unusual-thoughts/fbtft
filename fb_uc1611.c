@@ -55,13 +55,11 @@ static unsigned ratio = 2;
 module_param(ratio, uint, 0);
 MODULE_PARM_DESC(ratio, "BR[1:0] Bias voltage ratio: 0-3 (default: 2)");
 
-/*static unsigned gain = 3;*/
-static unsigned gain;
+static unsigned gain = 3;
 module_param(gain, uint, 0);
 MODULE_PARM_DESC(gain, "GN[1:0] Bias voltage gain: 0-3 (default: 3)");
 
-/*static unsigned pot = 16;*/
-static unsigned pot = 28;
+static unsigned pot = 16;
 module_param(pot, uint, 0);
 MODULE_PARM_DESC(pot, "PM[6:0] Bias voltage pot.: 0-63 (default: 16)");
 
