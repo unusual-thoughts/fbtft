@@ -36,12 +36,6 @@
 #define FPS		40
 
 /*
-static unsigned 3wire = 0;
-module_param(3wire, uint, 0);
-MODULE_PARM_DESC(3wire, "Use 3-wire (9-bit) SPI (default: 0)");
-*/
-
-/*
  * LCD voltage is a combination of ratio, gain, pot and temp
  *
  * V_LCD = V_BIAS * ratio
