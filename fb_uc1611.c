@@ -74,14 +74,6 @@ static int init_display(struct fbtft_par *par)
 
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
 
-	/* Set CS active high */
-	par->spi->mode |= SPI_CS_HIGH;
-	ret = par->spi->master->setup(par->spi);
-	if (ret) {
-		dev_err(par->info->device, "Could not set SPI_CS_HIGH\n");
-		return ret;
-	}
-
 	/* Reset controller */
 	write_reg(par, 0xE2);
 
@@ -158,8 +150,7 @@ static int set_var(struct fbtft_par *par)
 {
 	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "%s()\n", __func__);
 
-	/* par->info->fix.visual = FB_VISUAL_PSEUDOCOLOR; */
-	par->info->var.grayscale = 1;
+	par->info->var.grayscale     = 1;
 	par->info->var.red.offset    = 0;
 	par->info->var.red.length    = 8;
 	par->info->var.green.offset  = 0;
